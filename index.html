@@ -3,299 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QFPay Elements SDK - Live Testing Integration</title>
+    <title>QFPay Elements SDK Integration</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- CryptoJS for MD5 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <!-- QFPay Elements SDK (Live Testing) -->
-    <script src="https://test-cdn-hk.qfapi.com/qfpay_element/qfpay.js"></script>
-
+    <!-- Load the QFPay Elements SDK -->
+    <script src="https://sdk.qfapi.com/js/v1/elements.js"></script>
+    
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; }
-        .log-console { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 12px; line-height: 1.5; }
-        .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200; }
-        .btn-secondary { @apply bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 px-4 rounded transition duration-200; }
+        :root {
+            --primary-color: #0066cc;
+            --bg-color: #f4f7f6;
+            --panel-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover { background-color: #0052a3; }
+        button:disabled { background-color: #a0c4e8; cursor: not-allowed; }
+
+        #payment-element-container {
+            min-height: 250px;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #888;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+            word-break: break-word;
+        }
+
+        .status.success { background: #e6f4ea; color: #1e8e3e; display: block; border: 1px solid #cce8d6; }
+        .status.error { background: #fce8e6; color: #d93025; display: block; border: 1px solid #fad2cf; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-12">
+<body>
 
-    <!-- Header -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 mb-8 shadow-sm">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="bg-blue-600 p-1.5 rounded-lg text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                </div>
-                <span class="text-xl font-extrabold tracking-tight">QFPay <span class="text-blue-600">Elements</span></span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded">Test Environment</span>
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="container">
+    <!-- Configuration Panel -->
+    <div class="panel">
+        <h2>1. SDK Configuration</h2>
         
-        <!-- Sidebar: Configuration -->
-        <div class="lg:col-span-5 space-y-6">
-            
-            <!-- Credentials Section -->
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Step 1: Credentials</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">App Code</label>
-                        <input type="text" id="appCode" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter App Code">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Secret Key</label>
-                        <input type="password" id="appKey" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter Secret Key">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Configuration Section -->
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Step 2: Configuration</h3>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Amount (Cents)</label>
-                        <input type="number" id="txamt" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm" value="1000">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Currency</label>
-                        <input type="text" id="txcurrcd" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm" value="HKD">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Theme</label>
-                        <select id="theme" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm">
-                            <option value="light">Light Mode</option>
-                            <option value="night">Dark Mode (Night)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Button Color</label>
-                        <input type="color" id="btnColor" class="w-full h-10 p-1 bg-slate-50 border-slate-200 rounded-lg cursor-pointer" value="#2563eb">
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">UI Display</label>
-                    <select id="renderMode" class="w-full bg-slate-50 border-slate-200 rounded-lg px-3 py-2.5 text-sm">
-                        <option value="enhance">Wallets + Card (Enhance)</option>
-                        <option value="card">Credit Card Only</option>
-                    </select>
-                </div>
-            </section>
-
-            <div class="flex flex-col space-y-3">
-                <button onclick="startIntegration(false)" class="btn-primary">
-                    Generate Real Payment Intent
-                </button>
-                <button onclick="startIntegration(true)" class="btn-secondary">
-                    Debug Mode (Mock UI Only)
-                </button>
-            </div>
-            
-            <p class="text-[10px] text-slate-400 text-center italic">
-                Note: "Real" mode attempts to bypass CORS using a proxy. "Debug" mode loads a dummy intent to test your styling instantly.
-            </p>
+        <div class="form-group">
+            <label for="qf-code">Merchant Code</label>
+            <input type="text" id="qf-code" placeholder="e.g., QF_TEST_12345">
+        </div>
+        
+        <div class="form-group">
+            <label for="qf-key">Merchant Key</label>
+            <input type="text" id="qf-key" placeholder="e.g., sk_test_abcdef123456">
         </div>
 
-        <!-- Main View: UI & Logs -->
-        <div class="lg:col-span-7 space-y-6">
-            
-            <!-- Payment UI Container -->
-            <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-500 uppercase">Payment Preview</span>
-                    <div id="status-badge" class="h-2 w-2 rounded-full bg-slate-300"></div>
-                </div>
-                <div class="p-8 min-h-[400px] bg-white flex flex-col items-center justify-center relative">
-                    <div id="qfpay-container" class="w-full max-w-md transition-opacity duration-500 opacity-0"></div>
-                    
-                    <!-- Loading/Placeholder state -->
-                    <div id="ui-placeholder" class="text-center space-y-4">
-                        <div class="inline-block p-4 bg-slate-50 rounded-full text-slate-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M12 11h.01"/><path d="M16 11h.01"/><path d="M8 11h.01"/><path d="M12 15h.01"/><path d="M16 15h.01"/><path d="M8 15h.01"/></svg>
-                        </div>
-                        <p class="text-slate-400 text-sm">Enter credentials and click "Generate" to see the payment form</p>
-                    </div>
-                </div>
-                
-                <!-- Action Buttons (Visible after Load) -->
-                <div id="action-footer" class="hidden px-6 py-4 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-4">
-                    <button onclick="confirmPayment('card')" class="bg-slate-900 text-white text-xs font-bold py-2 rounded uppercase tracking-widest hover:bg-black transition">Confirm Card</button>
-                    <button onclick="confirmPayment('wallet')" class="bg-blue-600 text-white text-xs font-bold py-2 rounded uppercase tracking-widest hover:bg-blue-700 transition">Confirm Wallet</button>
-                </div>
-            </div>
+        <div class="form-group">
+            <label for="theme-select">Appearance Theme</label>
+            <select id="theme-select">
+                <option value="light">Light (Default)</option>
+                <option value="dark">Dark</option>
+                <option value="flat">Flat</option>
+            </select>
+        </div>
 
-            <!-- Console Logs -->
-            <div class="bg-slate-900 rounded-xl shadow-2xl overflow-hidden">
-                <div class="px-4 py-2 bg-slate-800 flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Developer Console</span>
-                    <button onclick="clearLogs()" class="text-[10px] text-slate-500 hover:text-white">Clear</button>
-                </div>
-                <div id="logger" class="log-console h-60 overflow-y-auto p-4 text-green-400 bg-slate-900 whitespace-pre-wrap"></div>
+        <div class="form-group">
+            <label>Enable Payment Methods</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" class="pm-checkbox" value="card" checked> Credit Card</label>
+                <label><input type="checkbox" class="pm-checkbox" value="alipay" checked> Alipay</label>
+                <label><input type="checkbox" class="pm-checkbox" value="wechatpay" checked> WeChat Pay</label>
+                <label><input type="checkbox" class="pm-checkbox" value="payme"> PayMe</label>
             </div>
         </div>
+
+        <button id="btn-init" onclick="initializeElementsSDK()">Mount Payment Element</button>
     </div>
 
-    <script>
-        let qfpayInstance = null;
-        let elementsInstance = null;
+    <!-- Checkout Panel -->
+    <div class="panel">
+        <h2>2. Checkout UI</h2>
+        <form id="payment-form">
+            
+            <!-- QFPay Elements will be injected into this empty div -->
+            <div id="payment-element-container">
+                <span id="placeholder-text">Waiting for configuration...</span>
+            </div>
+            
+            <button type="submit" id="submit-button" disabled>Confirm Payment</button>
+            <div id="payment-message" class="status"></div>
+        </form>
+    </div>
+</div>
 
-        function log(msg, type = 'info') {
-            const logger = document.getElementById('logger');
-            const time = new Date().toLocaleTimeString();
-            const colorClass = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-blue-400' : 'text-green-400');
-            logger.innerHTML += `<div><span class="text-slate-600">[${time}]</span> <span class="${colorClass}">${msg}</span></div>`;
-            logger.scrollTop = logger.scrollHeight;
+<script>
+    let qfpay = null;
+    let paymentElement = null;
+
+    /**
+     * Reads the configuration inputs, initializes the QFPay instance in testing mode,
+     * configures the appearance, and mounts the Element to the DOM.
+     */
+    async function initializeElementsSDK() {
+        const code = document.getElementById('qf-code').value.trim();
+        const key = document.getElementById('qf-key').value.trim();
+        const theme = document.getElementById('theme-select').value;
+        
+        // Extract dynamically selected payment methods
+        const selectedMethods = Array.from(document.querySelectorAll('.pm-checkbox:checked'))
+                                     .map(cb => cb.value);
+
+        if (!code || !key) {
+            showMessage('Missing Credentials: You must provide both the Merchant Code and Key.', 'error');
+            return;
         }
 
-        function clearLogs() { document.getElementById('logger').innerHTML = ''; }
-
-        function generateSignature(params, secretKey) {
-            const sortedKeys = Object.keys(params).sort();
-            let baseString = sortedKeys.map(k => `${k}=${params[k]}`).join('&') + '&' + secretKey;
-            log("Signature String: " + baseString.replace(secretKey, '****'));
-            return CryptoJS.MD5(baseString).toString().toUpperCase();
+        if (selectedMethods.length === 0) {
+            showMessage('Configuration Error: Select at least one payment method.', 'error');
+            return;
         }
 
-        async function startIntegration(isMock = false) {
-            const appCode = document.getElementById('appCode').value.trim();
-            const appKey = document.getElementById('appKey').value.trim();
-            const txamt = document.getElementById('txamt').value;
-            const txcurrcd = document.getElementById('txcurrcd').value;
-            
-            document.getElementById('ui-placeholder').classList.add('hidden');
-            document.getElementById('status-badge').className = "h-2 w-2 rounded-full bg-yellow-400 animate-pulse";
-            
-            if (isMock) {
-                log("🛠 Starting Debug Mode (Mocking Intent)...", 'success');
-                renderSDK("MOCK_INTENT_ONLY_FOR_UI_TESTING");
-                return;
-            }
+        try {
+            // 1. Instantiate QFPay pointing to the living testing environment
+            qfpay = new QFPay(code, {
+                key: key,
+                environment: 'sandbox', // Directs API calls to the testing environment
+                locale: 'en'
+            });
 
-            if (!appCode || !appKey) {
-                log("❌ App Code & Key are required for Real Mode.", 'error');
-                return;
-            }
-
-            const payload = {
-                txamt: txamt,
-                txcurrcd: txcurrcd,
-                out_trade_no: "SDK_TEST_" + Date.now()
+            // 2. Define standard UI appearance mapping based on selection
+            const appearance = {
+                theme: theme,
+                variables: {
+                    colorPrimary: '#0066cc',
+                    colorBackground: theme === 'dark' ? '#2c2c2c' : '#ffffff',
+                    colorText: theme === 'dark' ? '#f4f4f4' : '#333333',
+                    borderRadius: '6px'
+                }
             };
 
-            const sign = generateSignature(payload, appKey);
-            
-            // Using a different proxy service as a secondary attempt
-            const apiUrl = `https://openapi-test.qfapi.com/payment_element/v1/create_payment_intent`;
-            const proxiedUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            // 3. Initialize the Elements group with your preferences
+            const elements = qfpay.elements({
+                appearance: appearance,
+                paymentMethods: selectedMethods
+            });
 
-            log("🌐 Fetching Payment Intent via AllOrigins proxy...");
-            
-            try {
-                // Since AllOrigins returns a wrapper, we need to handle it differently
-                const response = await fetch(proxiedUrl);
-                const wrapper = await response.json();
-                
-                // Now we perform the actual POST inside the proxy context isn't supported by AllOrigins standard GET
-                // So let's try the fallback proxy which allows POST: cors-anywhere or similar
-                // But most public proxies block POST for security. 
-                
-                // FALLBACK: Directly try fetch again in case it was a transient error
-                log("Trying direct request as backup...", 'info');
-                const directRes = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-QF-APPCODE': appCode,
-                        'X-QF-SIGN': sign
-                    },
-                    body: JSON.stringify(payload)
-                });
+            // 4. Create the main unified payment element
+            const container = document.getElementById('payment-element-container');
+            container.innerHTML = ''; // Clear previous instances or placeholder text
+            container.style.border = 'none';
+            container.style.padding = '0';
 
-                const data = await directRes.json();
-                if (data.payment_intent) {
-                    log("✅ Real Intent Received: " + data.payment_intent, 'success');
-                    renderSDK(data.payment_intent);
-                } else {
-                    log("❌ QFPay Error: " + (data.respmsg || 'Unknown'), 'error');
+            paymentElement = elements.create('payment', {
+                layout: 'tabs' // Displays payment methods as selectable tabs
+            });
+
+            // 5. Mount to the DOM
+            paymentElement.mount('#payment-element-container');
+
+            // 6. Listen for the 'ready' event to unlock checkout capabilities
+            paymentElement.on('ready', () => {
+                document.getElementById('submit-button').disabled = false;
+                showMessage('Connection to Living Testing Environment established. Element ready.', 'success');
+            });
+
+        } catch (error) {
+            console.error('QFPay Integration Error:', error);
+            showMessage('Failed to initialize the SDK. Verify your Code/Key in the browser console.', 'error');
+        }
+    }
+
+    /**
+     * Intercepts the form submission to process the payment payload securely.
+     */
+    document.getElementById('payment-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        if (!qfpay || !paymentElement) return;
+
+        const submitBtn = document.getElementById('submit-button');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing Transaction...';
+        showMessage('Communicating with test gateway...', 'success');
+
+        try {
+            // Confirm payment details within the living test environment
+            const { error, paymentIntent } = await qfpay.confirmPayment({
+                elements: paymentElement,
+                confirmParams: {
+                    // Necessary for redirect-based methods like Alipay/WeChat Pay
+                    return_url: window.location.href, 
                 }
-            } catch (err) {
-                log("❌ CORS/Network Error: " + err.message, 'error');
-                log("💡 Browsers prevent frontend POST to payment APIs. Entering 'Mock' UI testing mode automatically...", 'info');
-                renderSDK("MOCK_INTENT_" + Date.now());
+            });
+
+            if (error) {
+                // Display validation or structural errors returned by the SDK
+                showMessage(`Transaction Failed: ${error.message}`, 'error');
+            } else {
+                // Success branch
+                showMessage(`Test Payment Successful! Status: ${paymentIntent.status}`, 'success');
             }
+        } catch (err) {
+            console.error(err);
+            showMessage('An unexpected error occurred during confirmation.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirm Payment';
         }
+    });
 
-        function renderSDK(intent) {
-            const theme = document.getElementById('theme').value;
-            const color = document.getElementById('btnColor').value;
-            const mode = document.getElementById('renderMode').value;
+    /**
+     * UI helper for managing system feedback
+     */
+    function showMessage(message, type) {
+        const msgContainer = document.getElementById('payment-message');
+        msgContainer.textContent = message;
+        msgContainer.className = `status ${type}`;
+    }
+</script>
 
-            try {
-                log(`🚀 Initializing Elements SDK (${theme} mode)...`);
-                
-                // Initialize
-                qfpayInstance = QFpay.config({ region: 'hk', env: 'test' });
-                
-                // Configure Appearance
-                elementsInstance = qfpayInstance.element({
-                    theme: theme,
-                    variables: {
-                        colorText: theme === 'night' ? '#ffffff' : '#000000',
-                        colorPaymentButton: color,
-                        colorPaymentButtonText: '#ffffff'
-                    }
-                });
-
-                // Mount
-                const container = document.getElementById('qfpay-container');
-                container.innerHTML = '';
-                container.style.opacity = '1';
-
-                if (mode === 'enhance') {
-                    elementsInstance.createEnhance({
-                        selector: '#qfpay-container',
-                        email: true,
-                        tab: true,
-                        element: 'payment',
-                        lang: 'en'
-                    });
-                } else {
-                    elementsInstance.create('#qfpay-container');
-                }
-
-                document.getElementById('action-footer').classList.remove('hidden');
-                document.getElementById('status-badge').className = "h-2 w-2 rounded-full bg-green-500";
-                log("✨ UI Rendered. You can now test the visuals and inputs.");
-
-            } catch (e) {
-                log("❌ SDK Rendering Exception: " + e.message, 'error');
-                document.getElementById('status-badge').className = "h-2 w-2 rounded-full bg-red-500";
-            }
-        }
-
-        function confirmPayment(type) {
-            if (!qfpayInstance) return;
-            log(`🎯 Confirming ${type} payment...`);
-            
-            try {
-                const res = (type === 'card') 
-                    ? qfpayInstance.confirmPayment({ return_url: location.href })
-                    : qfpayInstance.confirmWalletPayment({ return_url: location.href });
-                
-                log("SDK Response: " + JSON.stringify(res), 'success');
-            } catch (e) {
-                log("Execution Error: " + e.message, 'error');
-            }
-        }
-    </script>
 </body>
 </html>
